@@ -15,53 +15,71 @@ var context = canvas.getContext("2d")
 var numSquares = 20;
 var size = 10;
 var followers = Array(numSquares);
-var xpos = 100;
-var ypos = 100;
-
-
-for (var i = 0; i<numSquares; i++) {    
-    followers[i] = new Follower(xpos,ypos,size);
-    followers[i].steps = Math.random()*10+5;
-}
-
+var xpos = 0;
+var ypos = 0;
 var cursorX = 0;
 var cursorY = 0;
+var cursorVelX = 0;
+var cursorVelY = 0;
+var sight = 100;
+var neighbordist = 50;
+var cohesion = 0.001;
+var trust = 2;
+var consensus = 0.85;
+var antsyness = 0.25;
+var cursorBufferX = Array(100).fill(0);
+var cursorBufferY = Array(100).fill(0);
+
+//create followers
+for (var i = 0; i<numSquares; i++) {
+    followers[i] = new Follower(xpos,ypos,size,i);
+}
 
 //listener
 canvas.addEventListener("mousemove",getCursorXY,false);
 
-//objects
-
-function Follower(x,y,size) {
+//Follower definition
+function Follower(x,y,size,id) {
+    //target position relative to the cursor
     this.xoffset = Math.random()*50*2-50;
     this.yoffset = Math.random()*50*2-50;
     
-    this.xpos = x+ this.xoffset;
-    this.ypos = y+ this.yoffset;
+    //actual position
+    this.xpos = x + this.xoffset+ canvas.width/2;
+    this.ypos = y + this.yoffset+ canvas.height/2;
     
-    this.s = size;
+    //distance from target point
     this.dx = 0;
     this.dy = 0;
-    this.steps = Math.random()*size+5;
+    
+    //# steps per update
+    //change this to a velocity
+    this.steps = Math.random()*10+100;
+    
+    //size of image
+    this.s = size;
+    //random color of image
     this.color = getRandomColor();
+    
+    this.neighbors=[];
+    this.steps = Math.random()*10+5;
+    
+    this.id = id;
+    this.isleader = false;
+    
+    this.xheading = Math.random()*2-1;
+    this.yheading = Math.random()*2-1;
+    hyp = Math.hypot(this.xheading,this.yheading);
+    this.xheading = this.xheading/hyp;
+    this.yheading = this.yheading/hyp;
 }
 
 
 //functions
 function getCursorXY(e) {
-	cursorX = e.clientX;
+    cursorX = e.clientX;
 	cursorY = e.clientY;
 }
-
-/*
-function getRandPos(numSquares,size) {
-    var randPos = Array(numSquares).fill(0);
-    for(var i = 1; i<numSquares; i++) {
-        randPos[i] = Math.random()*size*2-size;
-    }
-    return randPos;
-}
-*/
 
 function drawSquares(cursorX,cursorY,followers) {
     var rectW = size;
@@ -70,12 +88,81 @@ function drawSquares(cursorX,cursorY,followers) {
     context.clearRect(0,0,canvas.width,canvas.height);
     
     followers.forEach(function (f) {
-        f.dx = cursorX - f.xpos + f.xoffset;
-        f.dy = cursorY - f.ypos + f.yoffset;
-
-        f.xpos += f.dx/f.steps;
-        f.ypos += f.dy/f.steps;
+        //distance from cursor is cursor position minus the current position of the follower
+        f.dx = cursorX - f.xpos;
+        f.dy = cursorY - f.ypos;
         
+        f.color = 'red';
+        
+        //find nearest neighbors
+        f.neighbors = [];
+        followers.forEach(function (g) {
+            if (f.id !== g.id){
+                var xdiff = f.xpos - g.xpos;
+                var ydiff = f.ypos - g.ypos;
+                var dist = Math.hypot(xdiff,ydiff);
+                if (dist < neighbordist) {
+                    f.neighbors.push(g)
+                    f.color='orange';
+                }
+            }
+        });
+        
+        //assign leadership status based on proximity to cursor
+        var dist2cursor = Math.hypot(f.dx, f.dy);
+        if (dist2cursor < sight) {
+            f.isleader = true;
+            f.color = 'green';
+        }
+        else {
+            f.isleader = false;
+        }
+
+        //new position of the follower should be updated by adding a fraction of the distance between it and the cursor
+        if (f.isleader) {
+            f.xheading = f.dx/dist2cursor;
+            f.yheading = f.dy/dist2cursor;
+            
+            f.xpos += 20*f.xheading/f.steps;
+            f.ypos += 20*f.yheading/f.steps;
+        }
+        else {
+            //look in the average direction of your neighbors
+            var totalxh=f.xheading;
+            var totalyh=f.yheading;
+            for (var i=0; i<f.neighbors.length;i++){
+                var n = f.neighbors[i];
+                totalxh += consensus*n.xheading;
+                totalyh += consensus*n.yheading;
+                
+                if (Math.hypot(f.xpos-n.xpos,f.ypos-n.ypos)<size*2) {
+                    totalxh += trust*(f.xpos-n.xpos);
+                    totalyh += trust*(f.ypos-n.ypos);
+                }
+                else {
+                    totalxh -= cohesion*(f.xpos-n.xpos);
+                    totalyh -= cohesion*(f.ypos-n.ypos);    
+                }
+            }
+            f.xheading = totalxh/Math.hypot(totalxh,totalyh);
+            f.yheading = totalyh/Math.hypot(totalxh,totalyh);
+            
+            if (!isNaN(f.xheading) && !isNaN(f.yheading)) {
+                f.xpos += 20*f.xheading/f.steps;
+                f.ypos += 20*f.yheading/f.steps;
+            } 
+            
+            var randhx = Math.random()*2-1;
+            var randhy = Math.random()*2-1;
+            
+            f.xheading = f.xheading+randhx*antsyness;
+            f.yheading = f.yheading+randhy*antsyness;
+            f.xheading = f.xheading/Math.hypot(f.xheading,f.yheading);
+            f.yheading = f.yheading/Math.hypot(f.xheading,f.yheading);
+        }
+            
+        
+        //draw
         context.fillStyle=f.color;
         context.fillRect(f.xpos-rectW/2,f.ypos-rectH/2,rectW,rectH);
     });
@@ -84,6 +171,7 @@ function drawSquares(cursorX,cursorY,followers) {
 function animate() {    
     drawSquares(cursorX, cursorY,followers);
     
+    //I should learn more about this line probably
     requestAnimationFrame(animate);
 }
 
