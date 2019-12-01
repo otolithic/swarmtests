@@ -12,7 +12,7 @@ canvas.style.marginLeft=`${marginLeft}px`
 var context = canvas.getContext("2d")
 
 //buncha variables
-var numSquares = 20;
+var numSquares = 100;
 var size = 10;
 var followers = Array(numSquares);
 var xpos = 0;
@@ -22,11 +22,11 @@ var cursorY = 0;
 var cursorVelX = 0;
 var cursorVelY = 0;
 var sight = 100;
-var neighbordist = 50;
-var cohesion = 0.001;
-var trust = 2;
-var consensus = 0.85;
-var antsyness = 0.25;
+var neighbordist = 250;
+var cohesion = 0.00001;
+var repulsion = 0.01;
+var consensus = 0;
+var antsyness = 0.1;
 var cursorBufferX = Array(100).fill(0);
 var cursorBufferY = Array(100).fill(0);
 
@@ -62,7 +62,8 @@ function Follower(x,y,size,id) {
     this.color = getRandomColor();
     
     this.neighbors=[];
-    this.steps = Math.random()*10+5;
+    //this.steps = Math.random()*10+5;
+    this.steps = 10;
     
     this.id = id;
     this.isleader = false;
@@ -132,12 +133,15 @@ function drawSquares(cursorX,cursorY,followers) {
             var totalyh=f.yheading;
             for (var i=0; i<f.neighbors.length;i++){
                 var n = f.neighbors[i];
-                totalxh += consensus*n.xheading;
-                totalyh += consensus*n.yheading;
+                var mult = 1;
+                if (n.isleader)
+                    mult = numSquares;
+                totalxh += mult*consensus*n.xheading;
+                totalyh += mult*consensus*n.yheading;
                 
                 if (Math.hypot(f.xpos-n.xpos,f.ypos-n.ypos)<size*2) {
-                    totalxh += trust*(f.xpos-n.xpos);
-                    totalyh += trust*(f.ypos-n.ypos);
+                    totalxh += repulsion*(f.xpos-n.xpos);
+                    totalyh += repulsion*(f.ypos-n.ypos);
                 }
                 else {
                     totalxh -= cohesion*(f.xpos-n.xpos);
@@ -161,6 +165,18 @@ function drawSquares(cursorX,cursorY,followers) {
             f.yheading = f.yheading/Math.hypot(f.xheading,f.yheading);
         }
             
+        if (f.xpos > canvas.width) {
+            f.xpos = f.xpos % canvas.width;
+        }
+        if (f.xpos < 0) {
+            f.xpos = f.xpos + canvas.width;
+        }
+        if (f.ypos > canvas.width) {
+            f.ypos = f.ypos % canvas.width;
+        }
+        if (f.ypos < 0) {
+            f.ypos = f.ypos + canvas.width;
+        }
         
         //draw
         context.fillStyle=f.color;
