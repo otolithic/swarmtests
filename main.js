@@ -27,6 +27,34 @@ var repulsion = 2.5; //0.5;
 var consensus = 1;
 var antsyness = 0.1;
 
+//form stuff
+function setVars() {
+    
+    if (document.getElementById("sight").value) {
+        sight = document.getElementById("sight").value;
+    }
+    if (document.getElementById("neighbordist").value) {
+        neighbordist = document.getElementById("neighbordist").value;
+    }
+    if (document.getElementById("cohesion").value) {
+        cohesion = document.getElementById("cohesion").value;
+    }
+    if (document.getElementById("repulsion").value) {
+        repulsion = document.getElementById("repulsion").value;
+    }
+    if (document.getElementById("consensus").value) {
+        consensus = document.getElementById("consensus").value;
+    }
+    if (document.getElementById("antsyness").value) {
+        antsyness = document.getElementById("antsyness").value;
+    }
+    //regenerate
+    for (var i = 0; i<numSquares; i++) {
+        followers[i] = new Follower(xpos,ypos,i);
+    }
+}
+
+
 //listener
 canvas.addEventListener("mousemove",getCursorXY,false);
 function getCursorXY(e) {

@@ -10,7 +10,7 @@ input[type=text], select {
     box-sizing: border-box;
 }
 
-input[type=submit] {
+button {
     width: 100%;
     background-color: #4CAF50;
     color: white;
@@ -21,7 +21,7 @@ input[type=submit] {
     cursor: pointer;
 }
 
-input[type=submit]:hover {
+button:hover {
     background-color: #45a049;
 }
 
@@ -40,7 +40,7 @@ div {
     <script src="main.js"></script>
     
     <div>
-        <form action=>
+        <form name="vars">
             <label for="sight">Sight</label>
             <input type="text" id="sight" name="sightbox" placeholder="100">
 
@@ -59,7 +59,7 @@ div {
             <label for="Randomness">Randomness</label>
             <input type="text" id="randomness" name="antsybox" placeholder="0.1">
 
-            <input type="submit" value="Submit">
+            <button type="button" onclick="setVars()">Submit</button>
         </form>
     </div>
 </body>
