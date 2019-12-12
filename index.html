@@ -1,5 +1,66 @@
 <html>
+<style>
+input[type=text], select {
+    width: 100%;
+    padding: 5px 5px;
+    margin: 8px 0;
+    display: inline;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+input[type=submit] {
+    width: 100%;
+    background-color: #4CAF50;
+    color: white;
+    padding: 5px 5px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+input[type=submit]:hover {
+    background-color: #45a049;
+}
+
+div {
+    opacity: 0.5;
+    width: 150px;
+    right:0;
+    bottom:0;
+    position:absolute;
+    border-radius: 5px;
+    background-color: #f2f2f2;
+    padding: 20px;
+}
+</style>
 <body>
     <script src="main.js"></script>
+    
+    <div>
+        <form action=>
+            <label for="sight">Sight</label>
+            <input type="text" id="sight" name="sightbox" placeholder="100">
+
+            <label for="neighbordist">NeighborDist</label>
+            <input type="text" id="neighbordist" name="neighbox" placeholder="100">
+
+            <label for="Cohesion">Cohesion</label>
+            <input type="text" id="cohesion" name="cohesionbox" placeholder="0.02">
+            
+            <label for="Repulsion">Repulsion</label>
+            <input type="text" id="repulsion" name="repulsionbox" placeholder="2.5">
+            
+            <label for="Consensus">Consensus</label>
+            <input type="text" id="consensus" name="consensusbox" placeholder="1">
+            
+            <label for="Randomness">Randomness</label>
+            <input type="text" id="randomness" name="antsybox" placeholder="0.1">
+
+            <input type="submit" value="Submit">
+        </form>
+    </div>
 </body>
 </html>
