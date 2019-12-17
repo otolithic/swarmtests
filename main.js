@@ -76,16 +76,10 @@ function Follower(x,y,id) {
     this.dx = 0;
     this.dy = 0;
     
-    //# steps per update
-    //change this to a velocity
-    this.steps = Math.random()*10+100;
-    
-    //random color of image
-    this.color = 'red';
-    
-    this.neighbors=[];
-    //this.steps = Math.random()*10+5;
+    //steps per update
     this.steps = 10;
+    this.color = 'red';
+    this.neighbors=[];
     
     this.id = id;
     this.isleader = false;
@@ -216,10 +210,10 @@ function drawSquares(cursorX,cursorY) {
             f.xpos = f.xpos + canvas.width;
         }
         if (f.ypos > canvas.width) {
-            f.ypos = f.ypos % canvas.width;
+            f.ypos = f.ypos % canvas.height;
         }
         if (f.ypos < 0) {
-            f.ypos = f.ypos + canvas.width;
+            f.ypos = f.ypos + canvas.height;
         }
         
         //draw
